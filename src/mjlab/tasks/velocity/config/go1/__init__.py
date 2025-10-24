@@ -39,3 +39,23 @@ gym.register(
     "rl_cfg_entry_point": f"{__name__}.rl_cfg:UnitreeGo1PPORunnerCfg",
   },
 )
+
+gym.register(
+  id="Mjlab-Distill-Velocity-Flat-Unitree-Go1",
+  entry_point="mjlab.envs:ManagerBasedRlEnv",
+  disable_env_checker=True,
+  kwargs={
+    "env_cfg_entry_point": f"{__name__}.flat_env_cfg:UnitreeGo1FlatEnvCfg",
+    "rl_cfg_entry_point": f"{__name__}.rl_cfg:UnitreeGo1DistillRunnerCfg",
+  },
+)
+
+gym.register(
+  id="Mjlab-Distill-Velocity-Flat-Unitree-Go1-Play",
+  entry_point="mjlab.envs:ManagerBasedRlEnv",
+  disable_env_checker=True,
+  kwargs={
+    "env_cfg_entry_point": f"{__name__}.flat_env_cfg:UnitreeGo1FlatEnvCfg_PLAY",
+    "rl_cfg_entry_point": f"{__name__}.rl_cfg:UnitreeGo1DistillRunnerCfg",
+  },
+)

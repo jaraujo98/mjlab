@@ -10,10 +10,14 @@ from typing import Any, cast
 import gymnasium as gym
 import tyro
 
-from mjlab.rl import RslRlOnPolicyRunnerCfg, RslRlVecEnvWrapper
+from mjlab.rl import (
+  RslRlDistillationRunnerCfg,
+  RslRlOnPolicyRunnerCfg,
+  RslRlVecEnvWrapper,
+)
 from mjlab.tasks.tracking.rl import MotionTrackingOnPolicyRunner
 from mjlab.tasks.tracking.tracking_env_cfg import TrackingEnvCfg
-from mjlab.tasks.velocity.rl import VelocityOnPolicyRunner
+from mjlab.tasks.velocity.rl import VelocityDistillationRunner, VelocityOnPolicyRunner
 from mjlab.third_party.isaaclab.isaaclab_tasks.utils.parse_cfg import (
   load_cfg_from_registry,
 )
@@ -24,7 +28,7 @@ from mjlab.utils.torch import configure_torch_backends
 @dataclass(frozen=True)
 class TrainConfig:
   env: Any
-  agent: RslRlOnPolicyRunnerCfg
+  agent: RslRlDistillationRunnerCfg | RslRlOnPolicyRunnerCfg
   registry_name: str | None = None
   device: str = "cuda:0"
   video: bool = False
@@ -72,7 +76,7 @@ def run_train(task: str, cfg: TrainConfig) -> None:
 
   resume_path = (
     get_checkpoint_path(log_root_path, cfg.agent.load_run, cfg.agent.load_checkpoint)
-    if cfg.agent.resume
+    if (cfg.agent.resume or isinstance(cfg.agent, RslRlDistillationRunnerCfg))
     else None
   )
 
@@ -96,7 +100,14 @@ def run_train(task: str, cfg: TrainConfig) -> None:
       env, agent_cfg, str(log_dir), cfg.device, registry_name
     )
   else:
-    runner = VelocityOnPolicyRunner(env, agent_cfg, str(log_dir), cfg.device)
+    if isinstance(cfg.agent, RslRlDistillationRunnerCfg):
+      runner = VelocityDistillationRunner(env, agent_cfg, str(log_dir), cfg.device)
+      if resume_path is None:
+        raise ValueError(
+          "DistillationRunner requires specifying a checkpoint to load through --agent.load_run."
+        )
+    else:
+      runner = VelocityOnPolicyRunner(env, agent_cfg, str(log_dir), cfg.device)
 
   runner.add_git_repo_to_log(__file__)
   if resume_path is not None:
@@ -128,7 +139,7 @@ def main():
   # Parse the rest of the arguments + allow overriding env_cfg and agent_cfg.
   env_cfg = load_cfg_from_registry(chosen_task, "env_cfg_entry_point")
   agent_cfg = load_cfg_from_registry(chosen_task, "rl_cfg_entry_point")
-  assert isinstance(agent_cfg, RslRlOnPolicyRunnerCfg)
+  assert isinstance(agent_cfg, RslRlDistillationRunnerCfg | RslRlOnPolicyRunnerCfg)
 
   args = tyro.cli(
     TrainConfig,

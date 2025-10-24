@@ -97,6 +97,24 @@ Train a Unitree G1 to mimic reference motions. mjlab uses [WandB](https://wandb.
 
 > **Note**: For detailed motion preprocessing instructions, see the [BeyondMimic documentation](https://github.com/HybridRobotics/whole_body_tracking/blob/main/README.md#motion-preprocessing--registry-setup).
 
+---
+
+### 3. Teacher-Student Distillation
+
+Train a Unitree Go1 to follow velocity commands on flat terrain:
+
+```bash
+uv run train Mjlab-Velocity-Flat-Unitree-Go1 --env.scene.num-envs 4096
+```
+
+Distill the teacher policy into one that uses a smaller model:
+
+```bash
+uv run train Mjlab-Distill-Velocity-Flat-Unitree-Go1 --agent.load-run teacher_run_folder_name --env.scene.num-envs 4096
+
+uv run play Mjlab-Distill-Velocity-Flat-Unitree-Go1-Play --checkpoint-file path/to/model.pt
+```
+
 #### Train and Play
 
 ```bash

@@ -9,10 +9,14 @@ from typing import Literal, Optional, cast
 import gymnasium as gym
 import torch
 import tyro
-from rsl_rl.runners import OnPolicyRunner
+from rsl_rl.runners import DistillationRunner, OnPolicyRunner
 
 from mjlab.envs import ManagerBasedRlEnvCfg
-from mjlab.rl import RslRlOnPolicyRunnerCfg, RslRlVecEnvWrapper
+from mjlab.rl import (
+  RslRlDistillationRunnerCfg,
+  RslRlOnPolicyRunnerCfg,
+  RslRlVecEnvWrapper,
+)
 from mjlab.tasks.tracking.rl import MotionTrackingOnPolicyRunner
 from mjlab.tasks.tracking.tracking_env_cfg import TrackingEnvCfg
 from mjlab.third_party.isaaclab.isaaclab_tasks.utils.parse_cfg import (
@@ -177,9 +181,14 @@ def run_play(task: str, cfg: PlayConfig):
         env, asdict(agent_cfg), log_dir=str(log_dir), device=device
       )
     else:
-      runner = OnPolicyRunner(
-        env, asdict(agent_cfg), log_dir=str(log_dir), device=device
-      )
+      if isinstance(agent_cfg, RslRlDistillationRunnerCfg):
+        runner = DistillationRunner(
+          env, asdict(agent_cfg), log_dir=str(log_dir), device=device
+        )
+      else:
+        runner = OnPolicyRunner(
+          env, asdict(agent_cfg), log_dir=str(log_dir), device=device
+        )
     runner.load(str(resume_path), map_location=device)
     policy = runner.get_inference_policy(device=device)
 
@@ -210,7 +219,7 @@ def main():
   # Parse the rest of the arguments + allow overriding env_cfg and agent_cfg.
   env_cfg = load_cfg_from_registry(chosen_task, "env_cfg_entry_point")
   agent_cfg = load_cfg_from_registry(chosen_task, "rl_cfg_entry_point")
-  assert isinstance(agent_cfg, RslRlOnPolicyRunnerCfg)
+  assert isinstance(agent_cfg, RslRlDistillationRunnerCfg | RslRlOnPolicyRunnerCfg)
 
   args = tyro.cli(
     PlayConfig,

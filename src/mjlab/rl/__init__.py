@@ -1,5 +1,8 @@
 from mjlab.rl.config import (
   RslRlBaseRunnerCfg,
+  RslRlDistillationAlgorithmCfg,
+  RslRlDistillationRunnerCfg,
+  RslRlDistillationStudentTeacherCfg,
   RslRlOnPolicyRunnerCfg,
   RslRlPpoActorCriticCfg,
   RslRlPpoAlgorithmCfg,
@@ -12,4 +15,7 @@ __all__ = (
   "RslRlBaseRunnerCfg",
   "RslRlOnPolicyRunnerCfg",
   "RslRlVecEnvWrapper",
+  "RslRlDistillationRunnerCfg",
+  "RslRlDistillationStudentTeacherCfg",
+  "RslRlDistillationAlgorithmCfg",
 )
