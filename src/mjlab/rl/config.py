@@ -124,9 +124,9 @@ class RslRlDistillationStudentTeacherCfg:
   """Whether to normalize the observation for the student network."""
   teacher_obs_normalization: bool = False
   """Whether to normalize the observation for the teacher network."""
-  student_hidden_dims: Tuple[int, ...] = (128, 128, 128)
+  student_hidden_dims: Tuple[int, ...] = (256, 256, 256)
   """The hidden dimensions of the student network."""
-  teacher_hidden_dims: Tuple[int, ...] = (128, 128, 128)
+  teacher_hidden_dims: Tuple[int, ...] = (256, 256, 256)
   """The hidden dimensions of the teacher network."""
   activation: str = "elu"
   """The activation function for the student and teacher networks."""
@@ -138,7 +138,7 @@ class RslRlDistillationAlgorithmCfg:
 
   class_name: str = "Distillation"
   """The algorithm class name. Default is Distillation."""
-  num_learning_epochs: int = 5
+  num_learning_epochs: int = 1
   """The number of updates performed with each sample."""
   learning_rate: float = 1e-3
   """The learning rate for the student policy."""
